@@ -1,0 +1,43 @@
+name: Build dist (fix/mcp-self-hosted-auth)
+
+on:
+  push:
+    branches: [fix/mcp-self-hosted-auth]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-commit-dist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: fix/mcp-self-hosted-auth
+
+      - name: Node setup
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: "20.20.2"
+
+      - name: NPM v10
+        run: npm install -g npm@10 --registry=https://registry.npmjs.org
+
+      - run: npm i
+
+      - run: npm run build
+
+      - name: Commit built dist
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f dist
+          if git diff --cached --quiet; then
+            echo "No changes to dist, nothing to commit."
+            exit 0
+          fi
+          git commit -m "chore: commit built dist for standalone npx/git install"
+          git push origin HEAD:fix/mcp-self-hosted-auth
