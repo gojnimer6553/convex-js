@@ -26,7 +26,7 @@ jobs:
       - name: NPM v10
         run: npm install -g npm@10 --registry=https://registry.npmjs.org
 
-      - run: npm i
+      - run: npm i --legacy-peer-deps
 
       - run: npm run build
 
